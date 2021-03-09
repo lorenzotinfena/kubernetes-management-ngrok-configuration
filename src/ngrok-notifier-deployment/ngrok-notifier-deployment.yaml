@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ngrok-notifier-deployment
+  namespace: management-namespace
+spec:
+  selector:
+    matchLabels:
+      app: ngrok-notifier-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ngrok-notifier-deployment
+    spec:
+      containers:
+      - name: ngrok-notifier-deployment
+        image: ngrok-notifier
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: TELEGRAM_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: telegram-bot-secret
+                key: token
+          - name: TELEGRAM_CHAT_ID
+            valueFrom:
+              secretKeyRef:
+                name: telegram-bot-secret
+                key: chat-id
+          - name: NGROK_CLIENT_URLS
+            valueFrom:
+              configMapKeyRef:
+                name: ngrok-clients-config-map
+                key: ngrok-clients-urls
+          - name: PROTOCOLS
+            valueFrom:
+              configMapKeyRef:
+                name: ngrok-clients-config-map
+                key: protocols
+          - name: DESCRIPTIONS
+            valueFrom:
+              configMapKeyRef:
+                name: ngrok-clients-config-map
+                key: descriptions

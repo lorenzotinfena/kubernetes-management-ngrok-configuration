@@ -1,0 +1,6 @@
+version: '3.8'
+services:
+  ngrok-notifier:
+    container_name: ngrok-notifier
+    build: .
+    image: ngrok-notifier

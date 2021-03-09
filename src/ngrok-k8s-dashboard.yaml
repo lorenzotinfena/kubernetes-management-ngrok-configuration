@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ngrok-k8s-dashboard-deployment
+  namespace: management-namespace
+spec:
+  selector:
+    matchLabels:
+      app: ngrok-k8s-dashboard-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ngrok-k8s-dashboard-deployment
+    spec:
+      containers:
+      - name: ngrok-k8s-dashboard-deployment
+        image: wernight/ngrok
+        ports:
+        - containerPort: 4040
+        env:
+          - name: NGROK_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: ngrok-secret
+                key: token1
+          - name: NGROK_PROTOCOL
+            value: HTTP
+          - name: NGROK_REGION
+            value: eu
+          - name: NGROK_LOOK_DOMAIN
+            value: kubernetes-dashboard.kubernetes-dashboard
+          - name: NGROK_PORT
+            value: "443"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ngrok-k8s-dashboard-service
+  namespace: management-namespace
+spec:
+  ports:
+    - name: https
+      port: 4040
+      targetPort: 4040
+      protocol: TCP
+  selector:
+    app: ngrok-k8s-dashboard-deployment

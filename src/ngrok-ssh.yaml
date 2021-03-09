@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ngrok-ssh-deployment
+  namespace: management-namespace
+spec:
+  selector:
+    matchLabels:
+      app: ngrok-ssh-deployment
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ngrok-ssh-deployment
+    spec:
+      containers:
+      - name: ngrok-ssh-deployment
+        image: wernight/ngrok
+        ports:
+        - containerPort: 4040
+        env:
+          - name: NGROK_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: ngrok-secret
+                key: token2
+          - name: NGROK_PROTOCOL
+            value: TCP
+          - name: NGROK_REGION
+            value: eu
+          - name: NGROK_LOOK_DOMAIN
+            value: host.docker.internal
+          - name: NGROK_PORT
+            value: "22"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ngrok-ssh-service
+  namespace: management-namespace
+spec:
+  ports:
+    - name: ssh
+      port: 4040
+      targetPort: 4040
+      protocol: TCP
+  selector:
+    app: ngrok-ssh-deployment
